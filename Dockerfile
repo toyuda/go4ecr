@@ -1,5 +1,8 @@
 FROM docker:17.10.0-dind
 
+# install for 'curl' and 'make' command
+RUN apk add --no-cache curl alpine-sdk
+
 # golang
 ## ref https://github.com/docker-library/golang/blob/cffcff7fce7f6b6b5c82fc8f7b3331a10590a661/1.8/alpine3.6/Dockerfile
 #
@@ -66,3 +69,5 @@ LABEL Version="0.2"
 RUN apk update && apk add python py-pip
 RUN pip install awscli==1.11.168 --upgrade
 EXPOSE 0
+
+CMD ["tail","-f","/dev/null"]
