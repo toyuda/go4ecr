@@ -12,7 +12,8 @@ ENV GOLANG_VERSION 1.8.5
 
 # https://golang.org/issue/14851 (Go 1.8 & 1.7)
 # https://golang.org/issue/17847 (Go 1.7)
-COPY *.patch /go-alpine-patches/
+# COPY *.patch /go-alpine-patches/
+COPY golang/*.patch /go-alpine-patches/
 
 RUN set -eux; \
 	apk add --no-cache --virtual .build-deps \
@@ -59,7 +60,8 @@ ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 WORKDIR $GOPATH
 
-COPY go-wrapper /usr/local/bin/
+# COPY go-wrapper /usr/local/bin/
+COPY golan/go-wrapper /usr/local/bin/
 
 # aws cli
 ## ref https://github.com/jensendw/concourse-aws-cli/blob/master/Dockerfile
