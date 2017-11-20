@@ -1,7 +1,41 @@
-FROM amidos/dcind
+FROM alpine:3.6
 
 # install for 'bash', 'curl', 'make' command
 RUN apk add --no-cache bash curl alpine-sdk
+
+
+# mumoshu/dcind
+## https://github.com/mumoshu/dcind/blob/master/Dockerfile
+## NOTE: remove docker-compose
+#
+ENV DOCKER_VERSION=1.11.1 \
+    ENTRYKIT_VERSION=0.4.0
+
+# Install Docker
+RUN apk --update --no-cache \
+        add curl device-mapper mkinitfs zsh e2fsprogs e2fsprogs-extra iptables && \
+        curl https://get.docker.com/builds/Linux/x86_64/docker-${DOCKER_VERSION}.tgz | tar zx && \
+        mv /docker/* /bin/ && chmod +x /bin/docker* \
+    && \
+        apk add openssl \
+        && wget https://github.com/progrium/entrykit/releases/download/v${ENTRYKIT_VERSION}/entrykit_${ENTRYKIT_VERSION}_Linux_x86_64.tgz \
+        && tar -xvzf entrykit_${ENTRYKIT_VERSION}_Linux_x86_64.tgz \
+        && rm entrykit_${ENTRYKIT_VERSION}_Linux_x86_64.tgz \
+        && mv entrykit /bin/entrykit \
+        && chmod +x /bin/entrykit \
+        && entrykit --symlink
+
+WORKDIR /src
+
+RUN echo $'#!/bin/zsh \n\
+/bin/docker daemon' > /bin/docker-daemon && chmod +x /bin/docker-daemon
+
+ENV SWITCH_SHELL=zsh
+ENV CODEP_DAEMON=/bin/docker\ daemon
+
+# Include useful functions to start/stop docker daemon in garden-runc containers on Concourse CI
+# Its usage would be something like: source /docker.lib.sh && start_docker "" "" "-g=$(pwd)/graph"
+COPY dcind/docker-lib.sh /docker-lib.sh
 
 # golang
 ## ref https://github.com/docker-library/golang/blob/cffcff7fce7f6b6b5c82fc8f7b3331a10590a661/1.8/alpine3.6/Dockerfile
