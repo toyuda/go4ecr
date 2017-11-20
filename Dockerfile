@@ -55,6 +55,8 @@ ENV CODEP_COMPOSE=/usr/bin/docker-compose\ up
 # Its usage would be something like: source /docker.lib.sh && start_docker "" "" "-g=$(pwd)/graph"
 COPY dcind/docker-lib.sh /docker-lib.sh
 
+# ENTRYPOINT ["entrykit", "-e"]
+
 # golang
 ## ref https://github.com/docker-library/golang/blob/cffcff7fce7f6b6b5c82fc8f7b3331a10590a661/1.8/alpine3.6/Dockerfile
 #
@@ -124,4 +126,5 @@ RUN apk update && apk add python py-pip
 RUN pip install awscli==1.11.168 --upgrade
 EXPOSE 0
 
+ENTRYPOINT ["entrykit", "-e"]
 CMD []
