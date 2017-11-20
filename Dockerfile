@@ -1,4 +1,4 @@
-FROM docker:17.10.0-dind
+FROM amidos/dcind
 
 # install for 'bash', 'curl', 'make' command
 RUN apk add --no-cache bash curl alpine-sdk
@@ -72,5 +72,4 @@ RUN apk update && apk add python py-pip
 RUN pip install awscli==1.11.168 --upgrade
 EXPOSE 0
 
-ENTRYPOINT ["/usr/local/bin/dockerd-entrypoint.sh"]
 CMD []
