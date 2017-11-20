@@ -61,7 +61,7 @@ RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 WORKDIR $GOPATH
 
 # COPY go-wrapper /usr/local/bin/
-COPY golan/go-wrapper /usr/local/bin/
+COPY golang/go-wrapper /usr/local/bin/
 
 # aws cli
 ## ref https://github.com/jensendw/concourse-aws-cli/blob/master/Dockerfile
