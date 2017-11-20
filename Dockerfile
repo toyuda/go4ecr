@@ -66,10 +66,11 @@ COPY golang/go-wrapper /usr/local/bin/
 # aws cli
 ## ref https://github.com/jensendw/concourse-aws-cli/blob/master/Dockerfile
 #
-LABEL Name="concourse-aws-cli"
-LABEL Version="0.2"
+# LABEL Name="concourse-aws-cli"
+# LABEL Version="0.2"
 RUN apk update && apk add python py-pip
 RUN pip install awscli==1.11.168 --upgrade
 EXPOSE 0
 
-CMD ["tail","-f","/dev/null"]
+ENTRYPOINT ["/usr/local/bin/dockerd-entrypoint.sh"]
+CMD []
