@@ -1,7 +1,11 @@
 FROM alpine:3.6
 
-# install for 'bash', 'curl', 'make' command
-RUN apk add --no-cache bash curl alpine-sdk
+# install
+# * 'bash', 'curl', 'make' command
+# * UTC to JST
+RUN apk add --no-cache bash curl alpine-sdk tzdata && \
+    cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
+    apk del tzdata
 
 # meAmidos/dcind
 ## https://github.com/meAmidos/dcind/blob/master/Dockerfile
