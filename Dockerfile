@@ -3,7 +3,7 @@ FROM alpine:3.6
 # install
 # * 'bash', 'curl', 'make' command
 # * UTC to JST
-RUN apk add --no-cache bash curl alpine-sdk tzdata && \
+RUN apk add --no-cache bash curl openssh alpine-sdk tzdata && \
     cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
     apk del tzdata
 
