@@ -1,4 +1,4 @@
-FROM alpine:3.6
+FROM alpine:3.8
 
 # install
 # * 'bash', 'curl', 'make' command
@@ -40,16 +40,20 @@ COPY dcind/docker-lib.sh /docker-lib.sh
 # ]
 
 # golang
-## ref https://github.com/docker-library/golang/blob/cffcff7fce7f6b6b5c82fc8f7b3331a10590a661/1.8/alpine3.6/Dockerfile
+## ref https://github.com/docker-library/golang/blob/b7a4a48a142ef2ada9c5794ba054fd008656c779/1.10/alpine3.8/Dockerfile
 #
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache \
+		ca-certificates
 
-ENV GOLANG_VERSION 1.8.5
+# set up nsswitch.conf for Go's "netgo" implementation
+# - https://github.com/golang/go/blob/go1.9.1/src/net/conf.go#L194-L275
+# - docker run --rm debian:stretch grep '^hosts:' /etc/nsswitch.conf
+RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
 
-# https://golang.org/issue/14851 (Go 1.8 & 1.7)
-# https://golang.org/issue/17847 (Go 1.7)
-# COPY *.patch /go-alpine-patches/
-COPY golang/*.patch /go-alpine-patches/
+ENV GOLANG_VERSION 1.10.3
+
+# make-sure-R0-is-zero-before-main-on-ppc64le.patch: https://github.com/golang/go/commit/9aea0e89b6df032c29d0add8d69ba2c95f1106d9 (Go 1.9)
+#COPY *.patch /go-alpine-patches/
 
 RUN set -eux; \
 	apk add --no-cache --virtual .build-deps \
@@ -66,14 +70,19 @@ RUN set -eux; \
 # (for example, if our build host is GOARCH=amd64, but our build env/image is GOARCH=386, our build needs GOARCH=386)
 		GOOS="$(go env GOOS)" \
 		GOARCH="$(go env GOARCH)" \
-		GO386="$(go env GO386)" \
-		GOARM="$(go env GOARM)" \
 		GOHOSTOS="$(go env GOHOSTOS)" \
 		GOHOSTARCH="$(go env GOHOSTARCH)" \
 	; \
+# also explicitly set GO386 and GOARM if appropriate
+# https://github.com/docker-library/golang/issues/184
+	apkArch="$(apk --print-arch)"; \
+	case "$apkArch" in \
+		armhf) export GOARM='6' ;; \
+		x86) export GO386='387' ;; \
+	esac; \
 	\
 	wget -O go.tgz "https://golang.org/dl/go$GOLANG_VERSION.src.tar.gz"; \
-	echo '4949fd1a5a4954eb54dd208f2f412e720e23f32c91203116bed0387cf5d0ff2d *go.tgz' | sha256sum -c -; \
+	echo '567b1cc66c9704d1c019c50bef946272e911ec6baf244310f87f4e678be155f2 *go.tgz' | sha256sum -c -; \
 	tar -C /usr/local -xzf go.tgz; \
 	rm go.tgz; \
 	\
@@ -95,9 +104,6 @@ ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 WORKDIR $GOPATH
-
-# COPY go-wrapper /usr/local/bin/
-COPY golang/go-wrapper /usr/local/bin/
 
 # aws cli
 ## ref https://github.com/jensendw/concourse-aws-cli/blob/master/Dockerfile
